@@ -1,0 +1,153 @@
+-- CREATE DATABASE gogooo_db;
+-- grant all privileges on gogooo.* to root@localhost IDENTIFIED by '1234';
+CREATE TABLE gogooo_db.MEETING (
+  ID VARCHAR(80) NOT NULL
+  , NAME VARCHAR(120) NOT NULL
+  , PRIMARY KEY(ID)
+)
+;
+
+# 회원 User
+CREATE TABLE gogooo_db.USER (
+  `ID` varchar(80) NOT NULL,
+  `EMAIL` varchar(120) NOT NULL,
+  `NAME` varchar(120),
+  `PASSWORD` varchar(120),  
+  `AUTO_LOGIN_YN` char(1) NOT NULL,
+  `SING_UP_DT` date NOT NULL,
+  `LAST_LOGIN_DT` date ,
+  `WITHDRAWAL_DT` date ,
+  `PROFILE_ICON_CD` varchar(8) ,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+
+# 가입신청자 Join Applicant
+CREATE TABLE gogooo_db.JOIN_APPLICANT (
+  `ID` varchar(80) NOT NULL,
+  `EMAIL` varchar(120) NOT NULL,    
+  `APPLICATION_DT` date NOT NULL,
+  `APPROVAL_DT` date NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+
+#회사 도메인 내역
+CREATE TABLE gogooo_db.COMPANY (
+  `ID` varchar(12) NOT NULL,
+  `NAME` varchar(120) NOT NULL,    
+  `DOMAIN` varchar(120) NOT NULL,  
+  `COMPANY_TPCD` varchar(4) NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+
+# 관심분야 리스트 
+
+CREATE TABLE gogooo_db.INTEREST (
+  `ID` varchar(12) NOT NULL,
+  `NAME` varchar(120) NOT NULL,  
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+
+CREATE TABLE gogooo_db.USER_INTEREST (
+  `USER_ID` varchar(12) NOT NULL,
+  `INTEREST_ID` varchar(12) NOT NULL,
+  `ALT_TPCD` CHAR(1) DEFAULT 1 
+  PRIMARY KEY (`USER_ID`, `INTEREST_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+
+ALTER TABLE gogooo_db.COMPANY ADD COLUMN `ALT_TPCD` CHAR(1) DEFAULT 1;
+
+ALTER TABLE gogooo_db.INTEREST ADD COLUMN `ALT_TPCD` CHAR(1) DEFAULT 1;
+
+ALTER TABLE gogooo_db.JOIN_APPLICANT ADD COLUMN `ALT_TPCD` CHAR(1) DEFAULT 1;
+
+ALTER TABLE gogooo_db.MEETING ADD COLUMN `ALT_TPCD` CHAR(1) DEFAULT 1;
+
+ALTER TABLE gogooo_db.USER ADD COLUMN `ALT_TPCD` CHAR(1) DEFAULT 1;
+
+
+DESC gogooo_db.USER;
+
+INSERT into gogooo_db.USER 
+(ID, EMAIL, NAME, PASSWORD, AUTO_LOGIN_YN, SING_UP_DT, LAST_LOGIN_DT, WITHDRAWAL_DT, PROFILE_ICON_CD, ALT_TPCD)
+values 
+(1, 'admin@ksd.or.kr', '관리자',1234, 'Y', now(), now(), null, 'MERCURY-001', '1' );
+
+
+CREATE TABLE gogooo_dev.`USER_INTEREST` (
+  `USER_ID` int(11) NOT NULL,
+  `INTEREST_ID` int(11) NOT NULL,
+  `ALT_TPCD` char(1) DEFAULT '1',
+  PRIMARY KEY (`USER_ID`, `INTEREST_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+
+ALTER TABLE gogooo_dev.`USER_INTEREST` ADD CONSTRAINT UserId FOREIGN KEY (USER_ID) REFERENCES USER (ID);
+ALTER TABLE gogooo_dev.`USER_INTEREST` ADD CONSTRAINT InterestId FOREIGN KEY (INTEREST_ID) REFERENCES INTEREST (ID);
+ALTER TABLE gogooo_dev.`USER` ADD COLUMN `COMPANY_ID` int DEFAULT 1;
+ALTER TABLE gogooo_dev.`USER` ADD CONSTRAINT Company FOREIGN KEY (COMPANY_ID) REFERENCES COMPANY (ID);
+
+
+ALTER TABLE gogooo_dev.`MEETING_USER` DROP CONSTRAINT `MeetingId` 
+
+ALTER TABLE gogooo_dev.`MEETING_USER` ADD CONSTRAINT `MeetingUser_MeetingId` FOREIGN KEY (MEETING_ID) REFERENCES MEETING (ID);
+ALTER TABLE gogooo_dev.`MEETING_USER` ADD CONSTRAINT `MeetingUser_UserId` FOREIGN KEY (USER_ID) REFERENCES USER (ID);
+
+
+
+CREATE TABLE gogooo_dev.`CODE` (
+  `CODE` varchar(8),
+  `CODE_ID` varchar(8),
+  `VALUE` varchar(8), 
+  `ALT_TPCD` char(1) DEFAULT '1',
+  PRIMARY KEY (`CODE`, `CODE_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+
+
+ALTER TABLE gogooo_dev.MEETING ADD COLUMN `LOCATION_TITLE` varchar(50);
+ALTER TABLE gogooo_dev.MEETING ADD COLUMN `LOCATION_ADDRESS` varchar(300);
+
+CREATE TABLE gogooo_dev.`USER_MEETING` (
+  `USER_ID` int(11) NOT NULL,
+  `MEETING_ID` int(11) NOT NULL,
+  `ALT_TPCD` char(1) DEFAULT '1',
+  PRIMARY KEY (`USER_ID`,`MEETING_ID`), 
+  CONSTRAINT `UserMeeting_MeetingId` FOREIGN KEY (`MEETING_ID`) REFERENCES `MEETING` (`ID`),
+  CONSTRAINT `UserMeeting_UserId` FOREIGN KEY (`USER_ID`) REFERENCES `USER` (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+;
+
+
+
+ALTER TABLE gogooo_dev.`USER` ADD COLUMN `SCREEN_LOCK_YN` char(1) ;
+ALTER TABLE gogooo_dev.`USER` ADD COLUMN `SCREEN_PASSWORD` char(4) ;
+
+ALTER TABLE gogooo_dev.`USER` ADD COLUMN `LAST_MODFY_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`MEETING` ADD COLUMN `LAST_MODFY_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`USER` ADD COLUMN `LAST_MODFY_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`USER` ADD COLUMN `LAST_MODFY_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`MEETING` DROP COLUMN `LOCATION`;
+
+DROP TABLE gogooo_dev.`USER_MEETING`
+;
+
+
+
+ALTER TABLE gogooo_dev.`CODE` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`COMPANY` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`INTEREST` ADD COLUMN`LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`JOIN_APPLICANT` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`MEETING` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`MEETING_HASHTAG` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`USER` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`USER_INTEREST` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`USER_LIKE_MEETING` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`USER_LIKE_SUTAR_USER` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`USER_MEETING` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
+ALTER TABLE gogooo_dev.`USER_LIKE_STAR_USER` ADD COLUMN `LAST_MODFR_NO` int;
+ALTER TABLE gogooo_dev.`USER_LIKE_STAR_USER` ADD COLUMN `LAST_MODF_DTTM` datetime DEFAULT current_timestamp();
